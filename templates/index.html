@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador de Sentimientos</title>
+    <link rel="stylesheet" href="/static/styles.css"> <!-- Asegúrate de tener un archivo de estilo -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="sentiment-analyzer">
+        <h2>Analizador de Sentimientos</h2>
+        <form id="sentiment-form">
+          <label for="text-input">Escribe tu texto aquí:</label>
+          <textarea id="text-input" rows="5"></textarea>
+          <button type="submit">Analizar</button>
+        </form>
+      
+        <div id="result" class="result-container">
+          <h2>Resultados</h2>
+          <p><strong>Sentimiento (BERT):</strong> <span id="bert-label"></span> (Confianza: <span id="bert-confidence"></span>)</p>
+          <p><strong>Polaridad:</strong> <span id="polarity"></span></p>
+          <p><strong>Subjetividad:</strong> <span id="subjectivity"></span></p>
+        </div>
+      </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="script.js"></script> </body>
+
+    <script>
+        $(document).ready(function() {
+            $('#sentiment-form').on('submit', function(e) {
+                e.preventDefault(); // Evitar el envío normal del formulario
+
+                const text = $('#text-input').val();
+                
+                $.ajax({
+                    type: "POST",
+                    url: "/api/sentiment/",
+                    contentType: "application/json",
+                    data: JSON.stringify({ text: text }),
+                    success: function(data) {
+                        // Mostrar los resultados en el HTML
+                        $('#bert-label').text(data.bert_sentiment.label);
+                        $('#bert-confidence').text(data.bert_sentiment.confidence);
+
+                        // Verificar si polarity y subjectivity son null
+                        $('#polarity').text(data.textblob_sentiment.polarity !== null ? data.textblob_sentiment.polarity : "No disponible");
+                        $('#subjectivity').text(data.textblob_sentiment.subjectivity !== null ? data.textblob_sentiment.subjectivity : "No disponible");
+
+                        $('#result').show();
+                    },
+                    error: function() {
+                        alert("Error al analizar el sentimiento.");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
